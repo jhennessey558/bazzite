@@ -1,24 +1,20 @@
-#!/bin/bash
+FROM ghcr.io/ublue-os/bazzite-dx:latest@sha256:bd46bb2efee777a5663685aeaf08d9755abca97262f7c8995fbd81842bb06f86
 
-set -ouex pipefail
+## Other possible base images include:
+# FROM ghcr.io/ublue-os/bazzite:stable
+# FROM ghcr.io/ublue-os/bluefin-nvidia:stable
+# 
+# ... and so on, here are more base images
+# Universal Blue Images: https://github.com/orgs/ublue-os/packages
+# Fedora base image: quay.io/fedora/fedora-bootc:41
+# CentOS base images: quay.io/centos-bootc/centos-bootc:stream10
 
-### Install packages
+### MODIFICATIONS
+## make modifications desired in your image and install packages by modifying the build.sh script
+## the following RUN directive does all the things required to run "build.sh" as recommended.
 
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
+COPY build.sh /tmp/build.sh
 
-# this installs a package from fedora repos
-dnf5 install -y tmux terminator chrome 
-
-# Use a COPR Example:
-#
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
-# Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
-
-#### Example for enabling a System Unit File
-
-systemctl enable podman.socket
+RUN mkdir -p /var/lib/alternatives && \
+    /tmp/build.sh && \
+    ostree container commit
